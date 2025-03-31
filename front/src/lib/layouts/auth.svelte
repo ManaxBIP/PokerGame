@@ -4,7 +4,7 @@
     import { Label } from "$lib/components/ui/label/index.js";
 </script>
 
-<div class="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
+<div class="w-svw h-svh lg:grid lg:grid-cols-2">
     <div class="flex items-center justify-center py-12">
         <div class="mx-auto grid w-[350px] gap-6">
             <div class="grid gap-2 text-center">
