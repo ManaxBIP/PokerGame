@@ -4,5 +4,5 @@
 </script>
 
 <HomeLayout>
-    <playing-card suit=Hearts rank=10 class="!flex"></playing-card>
+    <playing-card suit=Hearts rank=10 class="w-20 h-20"></playing-card>
 </HomeLayout>
