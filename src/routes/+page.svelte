@@ -4,5 +4,4 @@
 </script>
 
 <HomeLayout>
-    CACA
 </HomeLayout>
