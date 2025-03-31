@@ -1,8 +1,8 @@
 <script lang="ts">
     import '../app.css';
-    import PlaygroundLayout from "$lib/layouts/playground.svelte";
+    import HomeLayout from "$lib/layouts/home.svelte";
 </script>
 
-<PlaygroundLayout>
+<HomeLayout>
     CACA
-</PlaygroundLayout>
+</HomeLayout>

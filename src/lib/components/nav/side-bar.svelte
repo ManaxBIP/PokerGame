@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import House from "lucide-svelte/icons/house";
     import ChartLine from "lucide-svelte/icons/chart-line";
     import Package from "lucide-svelte/icons/package";
@@ -15,9 +15,7 @@
     import * as Sheet from "$lib/components/ui/sheet/index.js";
     import * as Tooltip from "$lib/components/ui/tooltip/index.js";
 </script>
-
-<div class="bg-muted/40 flex min-h-screen w-full flex-col">
-    <aside class="bg-background fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r sm:flex">
+<aside class="bg-background fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r sm:flex">
         <nav class="flex flex-col items-center gap-4 px-2 sm:py-5">
             <a
                     href="##"
@@ -219,8 +217,5 @@
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
         </header>
-        <main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-            <slot></slot>
-        </main>
+        <slot></slot>
     </div>
-</div>
