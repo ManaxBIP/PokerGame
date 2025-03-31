@@ -6,7 +6,7 @@
     import PanelLeft from "lucide-svelte/icons/panel-left";
     import Search from "lucide-svelte/icons/search";
     import Settings from "lucide-svelte/icons/settings";
-    import ShoppingCart from "lucide-svelte/icons/shopping-cart";
+    import Gamepad2 from "lucide-svelte/icons/shopping-cart";
     import UsersRound from "lucide-svelte/icons/users-round";
     import * as Breadcrumb from "$lib/components/ui/breadcrumb/index.js";
     import { Button } from "$lib/components/ui/button/index.js";
@@ -33,10 +33,10 @@
                             {...builder}
                     >
                         <House class="h-5 w-5" />
-                        <span class="sr-only">Dashboard</span>
+                        <span class="sr-only">Home</span>
                     </a>
                 </Tooltip.Trigger>
-                <Tooltip.Content side="right">Dashboard</Tooltip.Content>
+                <Tooltip.Content side="right">Home</Tooltip.Content>
             </Tooltip.Root>
             <Tooltip.Root>
                 <Tooltip.Trigger asChild let:builder>
@@ -47,10 +47,10 @@
                             {...builder}
                     >
                         <ShoppingCart class="h-5 w-5" />
-                        <span class="sr-only">Orders</span>
+                        <span class="sr-only">Playground</span>
                     </a>
                 </Tooltip.Trigger>
-                <Tooltip.Content side="right">Orders</Tooltip.Content>
+                <Tooltip.Content side="right">Playground</Tooltip.Content>
             </Tooltip.Root>
             <Tooltip.Root>
                 <Tooltip.Trigger asChild let:builder>
