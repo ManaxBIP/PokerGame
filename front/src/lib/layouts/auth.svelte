@@ -1,48 +1,24 @@
 <script lang="ts">
-    import { Button } from "$lib/components/ui/button/index.js";
-    import { Input } from "$lib/components/ui/input/index.js";
-    import { Label } from "$lib/components/ui/label/index.js";
+
+const images = [
+    "https://images.pexels.com/photos/2631067/pexels-photo-2631067.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2", 
+    "https://images.pexels.com/photos/7594250/pexels-photo-7594250.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2", 
+    "https://images.pexels.com/photos/6664182/pexels-photo-6664182.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+];
+
 </script>
 
-<div class="w-svw h-svh lg:grid lg:grid-cols-2">
+<div class="w-svw lg:grid lg:grid-cols-2 h-svh flex align-center justify-center">
     <div class="flex items-center justify-center py-12">
-        <div class="mx-auto grid w-[350px] gap-6">
-            <div class="grid gap-2 text-center">
-                <h1 class="text-3xl font-bold">Login</h1>
-                <p class="text-muted-foreground text-balance">
-                    Enter your email below to login to your account
-                </p>
-            </div>
-            <div class="grid gap-4">
-                <div class="grid gap-2">
-                    <Label for="email">Email</Label>
-                    <Input id="email" type="email" placeholder="m@example.com" required />
-                </div>
-                <div class="grid gap-2">
-                    <div class="flex items-center">
-                        <Label for="password">Password</Label>
-                        <a href="##" class="ml-auto inline-block text-sm underline">
-                            Forgot your password?
-                        </a>
-                    </div>
-                    <Input id="password" type="password" required />
-                </div>
-                <Button type="submit" class="w-full">Login</Button>
-                <Button variant="outline" class="w-full">Login with Google</Button>
-            </div>
-            <div class="mt-4 text-center text-sm">
-                Don&apos;t have an account?
-                <a href="/sign-up" class="underline"> Sign up </a>
-            </div>
-        </div>
+        <slot></slot>
     </div>
     <div class="bg-muted hidden lg:block">
         <img
-                src="/images/placeholder.svg"
+                src={images[Math.floor(Math.random() * images.length)]}
                 alt="placeholder"
                 width="1920"
                 height="1080"
-                class="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+                class="h-svh w-full object-cover dark:brightness-[0.2] dark:grayscale"
         />
     </div>
 </div>
