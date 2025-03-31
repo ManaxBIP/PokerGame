@@ -71,7 +71,7 @@
                             class="overflow-hidden rounded-full"
                     >
                         <img
-                                src="/images/placeholder-user.jpg"
+                                src="https://unavatar.io/nayanmallet@gmail.com?fallback=https://avatar.vercel.sh/NayanMallet?size=128"
                                 width={36}
                                 height={36}
                                 alt="Avatar"
@@ -143,7 +143,7 @@
                             class="overflow-hidden rounded-full sm:hidden"
                     >
                         <img
-                                src="/images/placeholder-user.jpg"
+                                src="https://unavatar.io/nayanmallet@gmail.com?fallback=https://avatar.vercel.sh/NayanMallet?size=128"
                                 width={36}
                                 height={36}
                                 alt="Avatar"
