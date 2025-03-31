@@ -1,27 +1,6 @@
-/node_modules
-/front/node_modules
-/back/node_modules
-
-
-# Output
-.output
-.vercel
-.netlify
-.wrangler
-/build
-.idea
-/front/.svelte-kit
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Env
 .env
-.env.*
-!.env.example
-!.env.test
 
-# Vite
-vite.config.js.timestamp-*
-vite.config.ts.timestamp-*
+node_modules
+dist
+.vscode
+pnpm-lock.yaml
