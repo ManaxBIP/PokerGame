@@ -16,6 +16,10 @@
         </div>
         <div class="grid gap-6">
             <div class="grid gap-2">
+                <Label for="full_name">Full Name</Label>
+                <Input id="full_name" type="text" placeholder="m@example.com" required />
+            </div>
+            <div class="grid gap-2">
                 <Label for="email">Email</Label>
                 <Input id="email" type="email" placeholder="m@example.com" required />
                 <Label for="confirm_email">Confirm email</Label>
