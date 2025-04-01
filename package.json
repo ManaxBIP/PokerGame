@@ -53,8 +53,12 @@
 		"@supabase/supabase-js": "^2.49.4",
 		"@trpc/client": "^10.45.2",
 		"@trpc/server": "^10.45.2",
+		"@types/jsonwebtoken": "^9.0.9",
+		"hash-wasm": "^4.12.0",
+		"jsonwebtoken": "^9.0.2",
 		"prisma": "^6.5.0",
 		"trpc-sveltekit": "^3.6.3",
+		"trpc-transformer": "^3.2.2",
 		"zod": "^3.24.2"
 	}
 }
