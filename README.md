@@ -1,6 +1,6 @@
 # Utils
 
-Cards deck : https://cardmeister.github.io
+Cards deck api: https://deckofcardsapi.com
 
 ## Developing
 
