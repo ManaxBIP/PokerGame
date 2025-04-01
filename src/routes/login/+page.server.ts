@@ -1,7 +1,6 @@
 import { JWT_SECRET } from '$env/static/private';
 import prisma from '@/trpc/prisma';
 import { fail } from '@sveltejs/kit';
-import { md5 } from 'hash-wasm';
 import jwt from 'jsonwebtoken';
 import type { Actions } from './$types';
 
