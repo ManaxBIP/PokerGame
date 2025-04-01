@@ -1,8 +1,8 @@
-import { initTRPC } from '@trpc/server';
+import { t } from '@/trpc/t';
 
-const t = initTRPC.create();
+import { TRPCError } from '@trpc/server';
 
-export const logger = t.middleware(async ({ path, type, next }) => {
-  console.log(`[${type}] ${path}`);
-  return next();
+export const logger = t.middleware(async ({ next, ctx }) => {
+	if (!ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+	return next();
 });

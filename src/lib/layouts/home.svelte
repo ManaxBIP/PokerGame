@@ -1,5 +1,5 @@
 <script lang="ts">
-    import SideBar from "$lib/components/nav/side-bar.svelte";
+    import SideBar from "@/components/nav/side-bar.svelte";
 </script>
 
 <div class="bg-muted/40 flex w-svw h-svh flex-col">

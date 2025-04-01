@@ -1,10 +1,10 @@
 <script lang="ts">
 	import '../../app.css';
-	import HomeLayout from "$lib/layouts/home.svelte";
+	import HomeLayout from '@/layouts/home.svelte'
 	import { onMount } from 'svelte';
 
 	import { page } from '$app/stores';
-	import { trpc } from '$lib/trpc/client';
+	import { trpc } from '@/trpc/client';
 
 	interface DeckData {
 		deck_id: string;

@@ -1,6 +1,6 @@
 <script lang="ts">
     import '../app.css';
-    import HomeLayout from "$lib/layouts/home.svelte";
+		import HomeLayout from '@/layouts/home.svelte'
 </script>
 
 <HomeLayout>

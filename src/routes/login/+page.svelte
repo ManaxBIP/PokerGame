@@ -1,9 +1,9 @@
 <script lang="ts">
     import '../../app.css';
-    import AuthLayout from "$lib/layouts/auth.svelte";
-    import { Button } from "$lib/components/ui/button/index.js";
-    import { Input } from "$lib/components/ui/input/index.js";
-    import { Label } from "$lib/components/ui/label/index.js";
+    import AuthLayout from "@/layouts/auth.svelte";
+    import { Button } from "@/components/ui/button";
+    import { Input } from "@/components/ui/input";
+    import { Label } from "@/components/ui/label";
 </script>
 
 <AuthLayout>
