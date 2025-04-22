@@ -68,6 +68,6 @@ export const actions: Actions = {
 		});
 
 
-		throw redirect(302, '/dashboard');
+		throw redirect(302, '/');
 	}
 };

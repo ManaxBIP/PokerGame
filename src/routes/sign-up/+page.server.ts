@@ -55,6 +55,6 @@ export const actions: Actions = {
 			maxAge: 60 * 60 * 24 * 7, // 7 jours
 		});
 
-		throw redirect(302, '/dashboard');
+		throw redirect(302, '/');
 	},
 };
