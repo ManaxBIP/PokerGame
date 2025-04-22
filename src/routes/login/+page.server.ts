@@ -3,6 +3,7 @@ import prisma from '@/trpc/prisma';
 import { fail } from '@sveltejs/kit';
 import jwt from 'jsonwebtoken';
 import type { Actions } from './$types';
+import { redirect } from '@sveltejs/kit';
 
 export const actions: Actions = {
     login: async ({ request, cookies }) => {
@@ -18,11 +19,12 @@ export const actions: Actions = {
             
             cookies.set('jwt', jwt.sign({ id, email }, JWT_SECRET), { path: '/' });
             
-            return { success: true };
             // 👆 or, if we're using HTTP headers based auth, we could return the token,
             // and let the client set the header on subsequent requests
         } catch {
             return fail(401, { error: 'Authentication failed' });
         }
+
+        throw redirect(302, '/');
     }
 };

@@ -7,6 +7,11 @@ declare global {
 		// interface PageData {}
 		// interface PageState {}
 		// interface Platform {}
+		interface Locals {
+			userId?: number;
+			userEmail?: string;
+			// ou user?: User si tu préfères injecter l’objet complet
+		}
 	}
 }
 

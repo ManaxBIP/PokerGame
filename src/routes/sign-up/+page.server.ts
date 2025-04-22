@@ -34,5 +34,24 @@ export const actions = {
         }
 
         throw redirect(302, '/login');
+    },
+    load : async ({ locals }) => {
+        const userId = locals.userId;
+
+	if (!userId) {
+		throw redirect(302, '/login');
+	}
+
+	// Récupère les infos complètes de l'utilisateur
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: { fullName: true, email: true } // ce que tu veux afficher
+	});
+
+	if (!user) {
+		throw redirect(302, '/login');
+	}
+
+	return { user };
     }
 };
