@@ -75,4 +75,24 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  @layer utilities {
+    .animate-fade-in-up {
+      @apply opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards];
+    }
+    .animate-slide-in {
+      @apply animate-[fadeInUp_0.6s_ease-out_forwards];
+    }
+  
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
 }
