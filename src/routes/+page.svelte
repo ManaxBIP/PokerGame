@@ -53,16 +53,16 @@
       <div class="flex flex-col items-center gap-2">
         <h1 class="text-md md:text-xl">Why <strong>PokerGuys</strong> ?</h1>
         <ul class="space-y-4 list-none animate-fade-in-up">
-          <li class="flex items-start gap-3 opacity-0 animate-slide-in delay-[100ms]">
+          <li class="flex items-start gap-3 opacity-0 animate-slide-in delay-[100ms] text-sm">
             <span>🎲</span> <span><strong>Real-time game</strong> – Compete against players from around the world.</span>
           </li>
-          <li class="flex items-start gap-3 opacity-0 animate-slide-in delay-[200ms]">
+          <li class="flex items-start gap-3 opacity-0 animate-slide-in delay-[200ms] text-sm">
             <span>🧠</span> <span><strong>Strategy and competition</strong> – Designed for true enthusiasts.</span>
           </li>
-          <li class="flex items-start gap-3 opacity-0 animate-slide-in delay-[300ms]">
+          <li class="flex items-start gap-3 opacity-0 animate-slide-in delay-[300ms] text-sm">
             <span>🔐</span> <span><strong>Security & fairness</strong> – Certified algorithm, protected data.</span>
           </li>
-          <li class="flex items-start gap-3 opacity-0 animate-slide-in delay-[400ms]">
+          <li class="flex items-start gap-3 opacity-0 animate-slide-in delay-[400ms] text-sm">
             <span>💰</span> <span><strong>Rewards and tournaments</strong> – Weekly winnings.</span>
           </li>
         </ul>
