@@ -10,64 +10,51 @@ import { prisma } from '$lib/prisma';
 
 export const load: PageServerLoad = async () => {
 	return {
-		form: await superValidate(zod(formSchema))
+		form: await superValidate(zod(formSchema)),
 	};
 };
 
 export const actions: Actions = {
-	login: async (event) => {
+	signup: async (event) => {
 		const form = await superValidate(event, zod(formSchema));
 
 		if (!form.valid) {
 			return fail(400, { form });
 		}
 
-		const { email, password } = form.data;
-		const { cookies } = event;
+		const { email, password, fullName } = form.data;
 
-		const user = await prisma.user.findUnique({ where: { email } });
+		const existingUser = await prisma.user.findUnique({ where: { email } });
 
-		console.log(user);
-
-		if (!user) {
-			return fail(401, {
+		if (existingUser) {
+			return fail(400, {
 				form,
-				error: 'Email ou mot de passe invalide.'
+				error: 'Un compte avec cet email existe déjà.',
 			});
 		}
 
-		const isPasswordValid = await bcrypt.compare(password, user.password);
+		const hashedPassword = await bcrypt.hash(password, 10);
 
-		if (!isPasswordValid) {
-			return fail(401, {
-				form,
-				error: 'Email ou mot de passe invalide.'
-			});
-		}
-
-		const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
-			expiresIn: '7d'
+		const user = await prisma.user.create({
+			data: {
+				email,
+				password: hashedPassword,
+				fullName,
+			},
 		});
 
-		// cookies.set('jwt', token, {
-		// 	path: '/',
-		// 	httpOnly: true,
-		// 	sameSite: 'lax',
-		// 	secure: false, // Assurez-vous que c'est false en développement process.env.NODE_ENV === 'production',
-		// 	maxAge: 60 * 60 * 24 * 7 // 7 jours
-		// });
+		const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+			expiresIn: '7d',
+		});
 
-		console.log(token);
-
-		cookies.set('jwt', token, {
+		event.cookies.set('jwt', token, {
 			path: '/',
 			httpOnly: true,
 			sameSite: 'lax',
 			secure: process.env.NODE_ENV === 'production',
-			maxAge: 60 * 60 * 24 * 7 // 7 jours
+			maxAge: 60 * 60 * 24 * 7, // 7 jours
 		});
 
-
 		throw redirect(302, '/dashboard');
-	}
+	},
 };

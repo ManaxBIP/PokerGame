@@ -3,6 +3,7 @@ import { auth } from '@/trpc/middleware/auth'
 import { logger } from '@/trpc/middleware/logger'
 import { t } from '@/trpc/t'
 import { z } from 'zod'
+import type { User } from '@prisma/client';
 
 
 type UserListItem = Pick<User, 'id' | 'fullName' | 'email' | 'updatedAt'>
