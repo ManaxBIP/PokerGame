@@ -31,7 +31,7 @@
 		onResult: ({ result }) => {
 			if (result.type === 'success') {
 				console.log("Form result:", result);
-				goto("/");
+				goto("/dashboard");
 			}
 		}
 	});
