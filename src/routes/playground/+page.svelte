@@ -116,8 +116,15 @@
 
 			if (alivePlayers.length === 1) {
 			winner = `${alivePlayers[0].name} gagne car tout le monde c'est couché !`;
+			if (winner.includes('Toi')) playerChips += pot;
+			else if (winner.includes('AI 1')) ai1Chips += pot;
+			else if (winner.includes('AI 2')) ai2Chips += pot;
+
 			} else {
 			winner = determineWinner(finalPlayer, finalAi1, finalAi2, board);
+			if (winner.includes('Toi')) playerChips += pot;
+			else if (winner.includes('IA 1')) ai1Chips += pot;
+			else if (winner.includes('IA 2')) ai2Chips += pot;
 			}
 			gameStatus = '';
 		}
