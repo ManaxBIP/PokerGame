@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../../app.css';
+    import { Button } from "$lib/components/ui/button/index.js";
 	import HomeLayout from '@/layouts/home.svelte'
 	import { onMount } from 'svelte';
 
@@ -139,7 +140,7 @@
 	</div>
 	
 
-	<div id="game" class="hidden min-h-[96vh] overflow-hidden bg-green-700 text-white flex flex-col items-center py-4 space-y-8 rounded-lg">
+	<div id="game" class="hidden min-h-[96vh] overflow-hidden bg-green-800 text-white flex flex-col items-center py-4 space-y-8 rounded-lg">
 		<div class="flex gap-12">
 			<div class="text-center">
 			<p class="mb-1">IA 1 <span class="text-sm italic">({ai1Status})</span></p>
@@ -203,17 +204,16 @@
 		</div>
 	  
 		<div class="flex gap-4">
-		  <button
-			on:click={startGame}
-			hidden={gameStatus === 'started'}
-			class="bg-gray-800 hover:bg-gray-900 px-4 py-2 rounded"
-		  >
-			Nouvelle partie
-		  </button>
+			<Button
+				on:click={startGame}
+				class="bg-gray-800 hover:bg-gray-900 px-4 py-2 rounded {gameStatus === 'started' ? 'hidden' : ''}"
+			>
+				Nouvelle partie
+			</Button>
 
 		  {#if currentPhase < 3 && playerStatus === 'playing'}
 			<div class="mt-6 flex gap-4 justify-center">
-				<button
+				<Button
 				class="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700"
 				on:click={() => {
 					playerDecision = 'check';
@@ -222,8 +222,8 @@
 				}}
 				>
 				Check
-				</button>
-				<button
+				</Button>
+				<Button
 				class="bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700"
 				on:click={() => {
 					playerDecision = 'fold';
@@ -233,7 +233,7 @@
 				}}
 				>
 				Fold
-				</button>
+				</Button>
 			</div>
 			{/if}
 
