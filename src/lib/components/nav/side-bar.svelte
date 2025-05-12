@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import House from "lucide-svelte/icons/house";
     import ChartLine from "lucide-svelte/icons/chart-line";
     import Package2 from "lucide-svelte/icons/package-2";
@@ -9,6 +9,7 @@
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import * as Sheet from "$lib/components/ui/sheet/index.js";
 
+    export let user: { fullName: string; email: string } | null = null;
 </script>
 <aside class="bg-background fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r sm:flex">
         <nav class="flex flex-col items-center gap-4 px-2 sm:py-5">
@@ -30,13 +31,17 @@
                             size="icon"
                             class="overflow-hidden rounded-full"
                     >
-                        <img
-                                src="https://unavatar.io/nayanmallet@gmail.com?fallback=https://avatar.vercel.sh/NayanMallet?size=128"
-                                width={36}
-                                height={36}
-                                alt="Avatar"
-                                class="overflow-hidden rounded-full"
-                        />
+                        {#if user}
+                            <img
+                                    src={`https://unavatar.io/${user.email}?fallback=https://avatar.vercel.sh/${user.fullName}?size=128`}
+                                    width={36}
+                                    height={36}
+                                    alt="Avatar"
+                                    class="overflow-hidden rounded-full"
+                            />
+                        {:else}
+                        <span>CN</span>
+                        {/if}
                     </Button>
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content align="end" side="right">
@@ -45,7 +50,12 @@
                     <DropdownMenu.Item>Settings</DropdownMenu.Item>
                     <DropdownMenu.Item>Support</DropdownMenu.Item>
                     <DropdownMenu.Separator />
-                    <DropdownMenu.Item>Logout</DropdownMenu.Item>
+                    <form method="POST" action="/logout">
+                        <DropdownMenu.Item asChild>
+                            <button type="submit" class="w-full text-left">Logout</button>
+                        </DropdownMenu.Item>
+                    </form>
+
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
         </nav>
@@ -98,7 +108,11 @@
                     <DropdownMenu.Item>Settings</DropdownMenu.Item>
                     <DropdownMenu.Item>Support</DropdownMenu.Item>
                     <DropdownMenu.Separator />
-                    <DropdownMenu.Item>Logout</DropdownMenu.Item>
+                    <form method="POST" action="/logout">
+                        <DropdownMenu.Item asChild>
+                            <button type="submit" class="w-full text-left">Logout</button>
+                        </DropdownMenu.Item>
+                    </form>
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
         </header>

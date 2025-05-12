@@ -8,7 +8,9 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { formSchema } from './schema';
 import { prisma } from '$lib/prisma';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
+	if (locals.user) throw redirect(302, '/dashboard');
+
 	return {
 		form: await superValidate(zod(formSchema))
 	};
