@@ -1,10 +1,10 @@
 <script lang="ts">
 	import '../../app.css';
-	import HomeLayout from "$lib/layouts/home.svelte";
+	import HomeLayout from '@/layouts/home.svelte'
 	import { onMount } from 'svelte';
 
 	import { page } from '$app/stores';
-	import { trpc } from '$lib/trpc/client';
+	import { trpc } from '@/trpc/client';
 
 	interface DeckData {
 		deck_id: string;
@@ -57,13 +57,14 @@
 </script>
 
 <HomeLayout>
-	<a
-		href="#draw"
-		role="button"
-		class="secondary"
-		aria-busy={loading}
-		on:click|preventDefault={drawCard}>Draw Card</a
-	>
+	<div class="flex flex-col justify-between w-96 h-96 text-white border-1 border-black rounded-lg p-4 bg-[url(https://medias.lequipe.fr/img-ilosport-jpg/poker-aces-pair/1500000000406175/0-1200-604-75/7f4b1.jpg)] bg-cover bg-center">
+		<h1 class="text-2xl font-bold">Poker</h1>
+		<button
+			class="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+			on:click|preventDefault={loadData}
+			aria-busy={loading}
+			>Jouer</button>
+	</div>
 	<!--    <p>{greeting}</p>-->
 	{#if cardData}
 		<!--        <p>Card: {cardData.cards[0].value} of {cardData.cards[0].suit}</p>-->
@@ -73,3 +74,4 @@
 
 	{/if}
 </HomeLayout>
+
