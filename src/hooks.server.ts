@@ -10,7 +10,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		try {
 			const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
 			const user = await prisma.user.findUnique({ where: { id: decoded.id } });
-
+			
 			if (user) {
 				event.locals.user = user;
 			}
@@ -18,6 +18,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 			console.error('Invalid JWT:', err);
 			event.cookies.delete('jwt', { path: '/' });
 		}
+	}
+	if (event.url.pathname === '/.well-known/appspecific/com.chrome.devtools.json') {
+		return new Response(null, { status: 204 });
 	}
 
 	return resolve(event);

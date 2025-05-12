@@ -9,7 +9,7 @@ import { formSchema } from './schema';
 import { prisma } from '$lib/prisma';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	if (locals.user) throw redirect(302, '/dashboard');
+	if (locals.user) throw redirect(302, '/playground');
 
 	return {
 		form: await superValidate(zod(formSchema))
@@ -50,14 +50,6 @@ export const actions: Actions = {
 		const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
 			expiresIn: '7d'
 		});
-
-		// cookies.set('jwt', token, {
-		// 	path: '/',
-		// 	httpOnly: true,
-		// 	sameSite: 'lax',
-		// 	secure: false, // Assurez-vous que c'est false en développement process.env.NODE_ENV === 'production',
-		// 	maxAge: 60 * 60 * 24 * 7 // 7 jours
-		// });
 
 		console.log(token);
 

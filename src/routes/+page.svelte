@@ -4,9 +4,11 @@
     import * as Card from "$lib/components/ui/card/index.js";
     import * as Carousel from "$lib/components/ui/carousel/index.js";
     import { Button } from "$lib/components/ui/button";
+
+    export let data;
 </script>
 
-<HomeLayout>
+<HomeLayout user={data.user}>
   <div class="flex justify-center items-center flex-col h-full">
     <svg class="w-64 p-0" id="Calque_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024">
       <path d="M274.5,699c10.47,1.1,18.72,6.08,15.05,18.05-1.06,3.47-4.81,4.28-6.55,6.94,8.5.73,10.4,10.22,8.79,17.3-.78,3.41-8.1,9.71-11.29,9.71h-25.5v-50.5c0-.11,1.39-1.5,1.5-1.5,5.63,0,12.61-.57,18,0ZM264,706v15c8.84-.32,17.77,2.09,17.09-9.58-.34-5.85-12.36-5.61-17.09-5.42ZM264,744c26.68,4.24,26.37-20.83,0-17v17Z" fill="#151515"/>

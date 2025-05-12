@@ -233,9 +233,11 @@
 		hasActedThisPhase = true;
 		nextPhase();
 	};
+
+	export let data;
 </script>
 
-<HomeLayout>
+<HomeLayout user={data.user}>
 	<div
 		id="playButton"
 		class="border-1 flex h-96 w-96 flex-col justify-between rounded-lg border-black bg-[url(https://medias.lequipe.fr/img-ilosport-jpg/poker-aces-pair/1500000000406175/0-1200-604-75/7f4b1.jpg)] bg-cover bg-center p-4 text-white"
