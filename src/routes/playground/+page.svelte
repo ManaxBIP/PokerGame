@@ -52,6 +52,24 @@
 		river = community.river;
 	};
 
+	const checkIfGameOver = (board: any[]) => {
+		const alivePlayers = [
+			{ name: 'Toi', cards: playerStatus === 'playing' ? playerCards : [], status: playerStatus },
+			{ name: 'IA 1', cards: ai1Status === 'playing' ? ai1Cards : [], status: ai1Status },
+			{ name: 'IA 2', cards: ai2Status === 'playing' ? ai2Cards : [], status: ai2Status },
+		].filter(p => p.status !== 'fold');
+
+		if (alivePlayers.length === 1) {
+			winner = `${alivePlayers[0].name} gagne car tout le monde s'est couché !`;
+			gameStatus = '';
+			revealAllHands = true;
+			currentPhase = 3;
+			return true;
+		}
+		return false;
+	};
+
+
 	const nextPhase = () => {
 		hasActedThisPhase = false;
 		playerDecision = '';
@@ -70,7 +88,8 @@
 			if (ai2Status !== 'fold') ai2Status = getRandomDecision();
 		}
 
-		console.log(ai1Cards, ai2Cards);
+		if (checkIfGameOver(board)) return;
+
 
 		if (currentPhase === 1) {
 			playerHandDesc = playerStatus === 'playing' ? evaluateHand([...playerCards, ...flop]) : null;
