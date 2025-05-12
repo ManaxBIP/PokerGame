@@ -168,7 +168,7 @@
 		  <p class="mb-2">Toi</p>
 		  <div class="flex gap-2">
 			{#each playerCards as card}
-			  <img src={card.image} class="w-20 rounded shadow" alt="Player Card" />
+			  <img src={card.image} class="w-20 rounded shadow" alt="Player Card" style="opacity: {playerStatus === 'fold' ? 0.3 : 1}"/>
 			{/each}
 		  </div>
 		  {#if playerHandDesc}
