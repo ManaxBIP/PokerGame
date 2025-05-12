@@ -45,7 +45,6 @@
             <SideBarItem routeUrl="/playground" label="Playground" icon={Gamepad2} />
             <SideBarItem routeUrl="/analytics" label="Analytics" icon={ChartLine} />
         </nav>
-    {#if user}
         <nav class="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
             <DropdownMenu.Root>
                 <DropdownMenu.Trigger asChild let:builder>
@@ -55,13 +54,17 @@
                             size="icon"
                             class="overflow-hidden rounded-full"
                     >
-                        <img
-                          src={`https://unavatar.io/${user.email}?fallback=https://avatar.vercel.sh/${user.fullName}?size=128`}
-                                width={36}
-                                height={36}
-                                alt="Avatar"
-                                class="overflow-hidden rounded-full"
-                        />
+                        {#if user}
+                            <img
+                                    src={`https://unavatar.io/${user.email}?fallback=https://avatar.vercel.sh/${user.fullName}?size=128`}
+                                    width={36}
+                                    height={36}
+                                    alt="Avatar"
+                                    class="overflow-hidden rounded-full"
+                            />
+                        {:else}
+                        <span>CN</span>
+                        {/if}
                     </Button>
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content align="end" side="right">
@@ -70,12 +73,15 @@
                     <DropdownMenu.Item>Settings</DropdownMenu.Item>
                     <DropdownMenu.Item>Support</DropdownMenu.Item>
                     <DropdownMenu.Separator />
-                    <DropdownMenu.Item>Logout</DropdownMenu.Item>
+                    <form method="POST" action="/logout">
+                        <DropdownMenu.Item asChild>
+                            <button type="submit" class="w-full text-left">Logout</button>
+                        </DropdownMenu.Item>
+                    </form>
+
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
         </nav>
-    {:else}
-    {/if}
     </aside>
     <div class="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <header
@@ -126,7 +132,11 @@
                     <DropdownMenu.Item>Settings</DropdownMenu.Item>
                     <DropdownMenu.Item>Support</DropdownMenu.Item>
                     <DropdownMenu.Separator />
-                    <DropdownMenu.Item>Logout</DropdownMenu.Item>
+                    <form method="POST" action="/logout">
+                        <DropdownMenu.Item asChild>
+                            <button type="submit" class="w-full text-left">Logout</button>
+                        </DropdownMenu.Item>
+                    </form>
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
         </header>

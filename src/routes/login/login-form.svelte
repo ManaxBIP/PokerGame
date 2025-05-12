@@ -24,12 +24,8 @@
 		validators: zodClient(formSchema),
 		validationMethod: 'oninput',
 		customValidity: true,
-		onSubmit: ({ formData }) => {
-			console.log('Form submitted:', Object.fromEntries(formData.entries()));
-		},
 		onResult: ({ result }) => {
 			if (result.type === 'success') {
-				console.log('Form result:', result);
 				goto('/dashboard');
 			}
 		}
