@@ -23,6 +23,10 @@
 	let playerCards = [];
 	let ai1Cards = [];
 	let ai2Cards = [];
+	let isPlayerWinner = false;
+	let isDraw = false;
+
+
 
 	let flop = [];
 	let turn = null;
@@ -100,6 +104,7 @@
 		}
 		autoAdvanceIfFold();
 		if (currentPhase === 3) {
+
 			const board = [...flop, turn, river];
 			playerHandDesc = playerStatus === 'playing' ? evaluateHand([...playerCards, ...board]) : null;
 
@@ -116,10 +121,16 @@
 			].filter(p => p.status === 'playing' || p.status !== 'fold');
 
 			if (alivePlayers.length === 1) {
-			winner = `${alivePlayers[0].name} gagne car tout le monde c'est couché !`;
+				const soleWinner = alivePlayers[0];
+				isPlayerWinner = soleWinner.name === 'Toi';
+				winner = `${soleWinner.name} gagne car tout le monde s'est couché !`;
 			} else {
-			winner = determineWinner(finalPlayer, finalAi1, finalAi2, board);
+				winner = determineWinner(finalPlayer, finalAi1, finalAi2, board);
+				isDraw = winner.toLowerCase().includes('égalité') || winner.toLowerCase().includes('ex-aequo');
+				isPlayerWinner = !isDraw && winner.includes('Toi');
+
 			}
+
 			gameStatus = '';
 		}
 	};
@@ -222,16 +233,10 @@
 
 		</div>
 	  
-		<div class="flex gap-4">
-			<Button
-				on:click={startGame}
-				class="bg-gray-800 hover:bg-gray-900 px-4 py-2 rounded {gameStatus === 'started' ? 'hidden' : ''}"
-			>
-				Nouvelle partie
-			</Button>
+		<div class="flex gap-4 flex-col">
 
 		  {#if currentPhase < 3 && playerStatus === 'playing'}
-			<div class="mt-6 flex gap-4 justify-center">
+			<div class="mt-6 gap-4 justify-center flex">
 				<Button
 				class="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700"
 				on:click={() => {
@@ -256,9 +261,37 @@
 			</div>
 			{/if}
 
-		  {#if winner}
-			<p class="text-xl font-semibold mt-4">{winner}</p>
+			{#if winner}
+				<div class="mt-6 px-6 py-4 rounded-2xl shadow-lg text-center max-w-md mx-auto border-4 animate-fade-in
+					{isDraw 
+						? 'bg-gray-500 text-white border-gray-300' 
+						: isPlayerWinner 
+							? 'bg-lime-400 text-gray-900 border-white' 
+							: 'bg-red-600 text-white border-red-800'}">
+					
+					<h2 class="text-2xl font-extrabold tracking-wide">
+						{#if isDraw}
+							🤝 Égalité 🤝
+						{:else if isPlayerWinner}
+							🎉 Gagné 🎉
+						{:else}
+							💀 Perdu 💀
+						{/if}
+					</h2>
+
+					<p class="mt-2 text-lg font-medium">{winner}</p>
+				</div>
 			{/if}
+
+
+
+		  <Button
+				on:click={startGame}
+				class="bg-gray-800 hover:bg-gray-900 px-4 py-2 rounded {gameStatus === 'started' ? 'hidden' : ''}"
+			>
+				Nouvelle partie
+			</Button>
+		  
 		</div>
 	  </div>	  
 </HomeLayout>
