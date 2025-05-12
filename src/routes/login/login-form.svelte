@@ -85,7 +85,6 @@
 					</Form.Field>
 
 					<Form.Button type="submit" class="w-full">Login</Form.Button>
-					<Form.Button variant="outline" class="w-full">Login with Google</Form.Button>
 		</div>
 
 			<a class="mt-4 text-center text-sm group" href="/sign-up">

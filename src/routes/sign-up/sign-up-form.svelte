@@ -98,7 +98,6 @@
 
 			<div class="grid gap-2">
 				<Form.Button type="submit" class="w-full">Sign-up</Form.Button>
-				<Form.Button variant="outline" class="w-full">Sign-up with Google</Form.Button>
 			</div>
 
 			<a class="mt-4 text-center text-sm group" href="/login">
