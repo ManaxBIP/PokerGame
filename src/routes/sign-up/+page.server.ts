@@ -9,7 +9,7 @@ import { formSchema } from './schema';
 import { prisma } from '$lib/prisma';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	if (locals.user) throw redirect(302, '/dashboard');
+	if (locals.user) throw redirect(302, '/');
 
 	return {
 		form: await superValidate(zod(formSchema)),
