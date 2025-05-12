@@ -251,7 +251,6 @@
 		id="game"
 		class="flex hidden min-h-[96vh] flex-col items-center justify-between space-y-8 overflow-hidden rounded-lg bg-green-800 py-4 text-white"
 	>
-		<!-- Pot & Jetons -->
 		<div class="flex w-full max-w-4xl justify-around text-lg font-semibold text-white">
 			<div class="flex items-center gap-2">
 				<svg class="h-6 w-6 fill-yellow-300" viewBox="0 0 100 100"
@@ -280,7 +279,6 @@
 		</div>
 
 		<div class="flex gap-12">
-			<!-- IA 1 -->
 			<div class="text-center">
 				<p class="mb-1">IA 1 <span class="text-sm italic">({ai1Status})</span></p>
 				<div class="flex gap-2">
@@ -297,7 +295,6 @@
 				</div>
 			</div>
 
-			<!-- IA 2 -->
 			<div class="text-center">
 				<p class="mb-1">IA 2 <span class="text-sm italic">({ai2Status})</span></p>
 				<div class="flex gap-2">
