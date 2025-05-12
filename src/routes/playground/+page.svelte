@@ -5,71 +5,115 @@
 
 	import { page } from '$app/stores';
 	import { trpc } from '@/trpc/client';
+	import { determineWinner } from '$lib/utils/poker';
 
-	interface DeckData {
-		deck_id: string;
-		remaining: number;
-		shuffled: boolean;
-		success: boolean;
-	}
+	let winner = '';
+	let deckId = '';
+	let playerCards = [];
+	let ai1Cards = [];
+	let ai2Cards = [];
 
-	interface Card {
-		code: string;
-		image: string;
-		images: {
-			svg: string;
-			png: string;
-		};
-		value: string;
-		suit: string;
-	}
+	let flop = [];
+	let turn = null;
+	let river = null;
 
-	interface CardData {
-		success: boolean;
-		deck_id: string;
-		cards: Card[];
-		remaining: number;
-	}
+	let currentPhase = 0;
 
-	let greeting = 'press the button to load data';
-	let loading = false;
-	let deckData: DeckData | null = null;
-	let cardData: CardData | null = null;
+	const startGame = async () => {
+		currentPhase = 0;
+		winner = '';
+		const deck = await trpc($page).shuffleDeck.query();
+		deckId = deck.deck_id;
 
-	const loadData = async () => {
-		loading = true;
-		deckData = await trpc($page).shuffleDeck.query();
-		greeting = `Deck ID: ${deckData?.deck_id}`;
-		loading = false;
+		const hands = await trpc($page).dealToPlayers.query({ deckId });
+		playerCards = hands.player;
+		ai1Cards = hands.ai1;
+		ai2Cards = hands.ai2;
 
+		const community = await trpc($page).dealCommunityCards.query({ deckId });
+		flop = community.flop;
+		turn = community.turn;
+		river = community.river;
 	};
 
-	const drawCard = async () => {
-		if (!deckData) return;
-		loading = true;
-		cardData = await trpc($page).drawCard.query({ deckId: deckData.deck_id });
-		loading = false;
+	const nextPhase = () => {
+		if (currentPhase < 3) {
+			currentPhase += 1;
+		}
+		if (currentPhase === 3) {
+			const board = [...flop, turn, river];
+			winner = determineWinner(playerCards, ai1Cards, ai2Cards, board);
+		}	
 	};
 
 	onMount(() => {
-		loadData();
+		startGame();
 	});
 </script>
 
 <HomeLayout>
-	<a
-		href="#draw"
-		role="button"
-		class="secondary"
-		aria-busy={loading}
-		on:click|preventDefault={drawCard}>Draw Card</a
-	>
-	<!--    <p>{greeting}</p>-->
-	{#if cardData}
-		<!--        <p>Card: {cardData.cards[0].value} of {cardData.cards[0].suit}</p>-->
-		{#each cardData.cards as card}
-			<img src={card.image} alt="card" class="h-[9rem]"/>
-		{/each}
-
-	{/if}
+	<div class="min-h-screen bg-green-700 text-white flex flex-col items-center py-8 space-y-8">
+		<div class="flex gap-12">
+		  <div class="text-center">
+			<p class="mb-2">IA 1</p>
+			<div class="flex gap-2">
+			  {#each ai1Cards as card}
+				<img src="https://deckofcardsapi.com/static/img/back.png" class="w-16 rounded" />
+			  {/each}
+			</div>
+		  </div>
+		  <div class="text-center">
+			<p class="mb-2">IA 2</p>
+			<div class="flex gap-2">
+			  {#each ai2Cards as card}
+				<img src="https://deckofcardsapi.com/static/img/back.png" class="w-16 rounded" />
+			  {/each}
+			</div>
+		  </div>
+		</div>
+	  
+		<div class="flex gap-2 border-t border-b py-4">
+		  {#if currentPhase >= 1}
+			{#each flop as card}
+			  <img src={card.image} class="w-20 rounded shadow" />
+			{/each}
+		  {/if}
+		  {#if currentPhase >= 2}
+			<img src={turn.image} class="w-20 rounded shadow" />
+		  {/if}
+		  {#if currentPhase >= 3}
+			<img src={river.image} class="w-20 rounded shadow" />
+		  {/if}
+		</div>
+	  
+		<div class="text-center">
+		  <p class="mb-2">Toi</p>
+		  <div class="flex gap-2">
+			{#each playerCards as card}
+			  <img src={card.image} class="w-20 rounded shadow" />
+			{/each}
+		  </div>
+		</div>
+	  
+		<div class="flex gap-4">
+		  <button
+			on:click={startGame}
+			class="bg-gray-800 hover:bg-gray-900 px-4 py-2 rounded"
+		  >
+			Nouvelle partie
+		  </button>
+	  
+		  {#if currentPhase < 3}
+			<button
+			  on:click={nextPhase}
+			  class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
+			>
+			  Suivant
+			</button>
+		  {/if}
+		  {#if winner}
+			<p class="text-xl font-semibold mt-4">{winner}</p>
+			{/if}
+		</div>
+	  </div>	  
 </HomeLayout>

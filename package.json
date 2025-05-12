@@ -61,7 +61,8 @@
 		"bcrypt": "^5.1.1",
 		"bcryptjs": "^3.0.2",
 		"jsonwebtoken": "^9.0.2",
-		"prisma": "^6.5.0",
+		"openssl": "^2.0.0",
+		"prisma": "^6.7.0",
 		"trpc-sveltekit": "^3.6.3",
 		"trpc-transformer": "^3.2.2"
 	}
