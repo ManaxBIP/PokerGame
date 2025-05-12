@@ -48,7 +48,7 @@
       </g>
     </svg>
     <div class="flex flex-col items-center opacity-0 animate-[fadeInUp_0.8s_ease-out_forwards] delay-[300ms] justify-between h-full">
-      <h1 class="text-md text-center md:text-xl">Join the<strong>new generation</strong> of online poker. <strong>Fast</strong> games, players from <strong>around the world</strong>, real <strong>winnings</strong> !</h1>
+      <h1 class="text-md text-center md:text-xl">Join the <strong>new generation</strong> of online poker. <strong>Fast</strong> games, players from <strong>around the world</strong>, real <strong>winnings</strong> !</h1>
         <Button href="/login" class="mt-4" size="lg">Play Right Now!</Button>
       <div class="flex flex-col items-center gap-2">
         <h1 class="text-md md:text-xl">Why <strong>PokerGuys</strong> ?</h1>
