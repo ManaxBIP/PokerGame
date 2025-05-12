@@ -14,6 +14,7 @@
 	let gameStatus = '';
 	let winner = '';
 	let deckId = '';
+	let revealAllHands = false;
 	let hasActedThisPhase = false;
 	let playerHandDesc: any = null;
 	let ai1HandDesc: any = null;
@@ -36,6 +37,7 @@
 		playerStatus = 'playing';
 		playerDecision = '';
 		winner = '';
+		revealAllHands = false;
 		const deck = await trpc($page).shuffleDeck.query();
 		deckId = deck.deck_id;
 
@@ -75,9 +77,13 @@
 		} else if (currentPhase === 2) {
 			const board = [...flop, turn];
 			playerHandDesc = playerStatus === 'playing' ? evaluateHand([...playerCards, ...board]) : null;
-		} else if (currentPhase === 3) {
+		}
+		autoAdvanceIfFold();
+		if (currentPhase === 3) {
 			const board = [...flop, turn, river];
 			playerHandDesc = playerStatus === 'playing' ? evaluateHand([...playerCards, ...board]) : null;
+
+			if (playerStatus === 'fold') revealAllHands = true;
 
 			const finalPlayer = playerStatus === 'playing' ? playerCards : [];
 			const finalAi1 = ai1Status != 'fold' ? ai1Cards : [];
@@ -98,7 +104,13 @@
 		}
 	};
 
-
+	const autoAdvanceIfFold = () => {
+		if (playerStatus === 'fold' && currentPhase < 3) {
+			setTimeout(() => {
+				nextPhase();
+			}, 1500);
+		}
+	};
 
 	onMount(() => {
 		startGame();
@@ -113,18 +125,13 @@
 			<div class="flex gap-2">
 				{#each ai1Cards as card}
 				<img
-					src="https://deckofcardsapi.com/static/img/back.png"
+					src={revealAllHands && ai1Status !== 'fold' ? card.image : "https://deckofcardsapi.com/static/img/back.png"}
 					class="w-16 rounded opacity-100"
 					style="opacity: {ai1Status === 'fold' ? 0.3 : 1}"
 					alt="AI Card"
 				/>
 				{/each}
 			</div>
-			{#if ai1HandDesc}
-				<p class="text-sm mt-1 text-gray-400 italic">
-					Main : {ai1HandDesc.hand.replace(/_/g, ' ')}
-				</p>
-			{/if}
 
 			</div>
 		
@@ -133,18 +140,13 @@
 			<div class="flex gap-2">
 				{#each ai2Cards as card}
 				<img
-					src="https://deckofcardsapi.com/static/img/back.png"
+					src={revealAllHands && ai2Status !== 'fold' ? card.image : "https://deckofcardsapi.com/static/img/back.png"}
 					class="w-16 rounded opacity-100"
 					style="opacity: {ai2Status === 'fold' ? 0.3 : 1}"
 					alt="AI Card"
 				/>
 				{/each}
 			</div>
-			{#if ai2HandDesc}
-				<p class="text-sm mt-1 text-gray-400 italic">
-					Main : {ai2HandDesc.hand.replace(/_/g, ' ')}
-				</p>
-			{/if}
 
 			</div>
 		</div>
@@ -214,17 +216,6 @@
 			</div>
 			{/if}
 
-	  
-		  {#if currentPhase < 3}
-			<button
-			  on:click={nextPhase}
-			  class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
-			  hidden={currentPhase < 3 && playerStatus === 'playing' && !playerDecision}
-			  disabled={currentPhase < 3 && playerStatus === 'playing' && !playerDecision}
-			>
-			  Suivant
-			</button>
-		  {/if}
 		  {#if winner}
 			<p class="text-xl font-semibold mt-4">{winner}</p>
 			{/if}

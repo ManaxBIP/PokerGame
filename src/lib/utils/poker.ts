@@ -117,4 +117,3 @@ export function evaluateHand(cards: any[]): { hand: PokerHand; score: number } {
     if (first?.count === 2) return { hand: 'one_pair', score: 100 + first.value };
     return { hand: 'high_card', score: values[0] };
   }
-  
