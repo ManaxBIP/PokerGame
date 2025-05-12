@@ -12,6 +12,7 @@
 	import { zodClient } from "sveltekit-superforms/adapters";
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { tick } from 'svelte';
 
 	type Props = {
 		data: SuperValidated<Infer<FormSchema>>;
@@ -30,7 +31,7 @@
 		onResult: ({ result }) => {
 			if (result.type === 'success') {
 				console.log('Form result:', result);
-				goto('/');
+				goto('/playground');
 			}
 		}
 	});
