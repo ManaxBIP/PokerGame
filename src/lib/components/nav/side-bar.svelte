@@ -8,19 +8,18 @@
     import SideBarItem from "$lib/components/nav/side-bar-item.svelte";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import * as Sheet from "$lib/components/ui/sheet/index.js";
+
 </script>
 <aside class="bg-background fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r sm:flex">
         <nav class="flex flex-col items-center gap-4 px-2 sm:py-5">
             <a
                     href="##"
-                    class="bg-primary text-primary-foreground group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base"
+                    class="bg-white border-1 border-black text-primary-foreground group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base"
             >
-                <Package2 class="h-4 w-4 transition-all group-hover:scale-110" />
-                <span class="sr-only">Acme Inc</span>
+                <img src="favicon.svg" alt="Logo" class="h-5 w-5" />
             </a>
-            <SideBarItem routeUrl="/" label="Home" icon={House} />
+            <SideBarItem routeUrl="/" label="Home" icon={House}/>
             <SideBarItem routeUrl="/playground" label="Playground" icon={Gamepad2} />
-            <SideBarItem routeUrl="/analytics" label="Analytics" icon={ChartLine} />
         </nav>
         <nav class="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
             <DropdownMenu.Root>
@@ -73,7 +72,6 @@
                         </a>
                         <SideBarItem routeUrl="/" label="Home" icon={House} mobile />
                         <SideBarItem routeUrl="/playground" label="Playground" icon={Gamepad2} mobile />
-                        <SideBarItem routeUrl="/analytics" label="Analytics" icon={ChartLine} mobile />
                     </nav>
                 </Sheet.Content>
             </Sheet.Root>
