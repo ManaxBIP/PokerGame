@@ -21,6 +21,8 @@
 	let currentPhase = 0;
 	let currentBet = 0;
 	let minRaise = 50;
+	let raiseAmount = 50;
+	let gameOver = false;
 
 	let playerHandDesc: any = null;
 	let ai1HandDesc: any = null;
@@ -47,6 +49,8 @@
 	let playerContribution = 0;
 	let ai1Contribution = 0;
 	let ai2Contribution = 0;
+
+	let tournamentOver = false;
 
 	const rotateDealer = () => {
 		dealerPosition = (dealerPosition + 1) % 3;
@@ -79,21 +83,52 @@
 		if (player === 'player') playerContribution += bet;
 		if (player === 'ai1') ai1Contribution += bet;
 		if (player === 'ai2') ai2Contribution += bet;
+		if (chips[player] === 0) {
+			if (player === 'player') playerStatus = 'all-in';
+			if (player === 'ai1') ai1Status = 'all-in';
+			if (player === 'ai2') ai2Status = 'all-in';
+		}
 		return bet;
 	};
 
+	const eliminateBrokePlayers = () => {
+		if (chips.player <= 0) playerStatus = 'out';
+		if (chips.ai1 <= 0) ai1Status = 'out';
+		if (chips.ai2 <= 0) ai2Status = 'out';
+	};
+
+	const checkIfOnlyOneRemaining = () => {
+		const active = [playerStatus, ai1Status, ai2Status].filter((s) => s !== 'out');
+		if (active.length < 2) {
+			gameOver = true;
+			gameStatus = '';
+		}
+	};
+
 	const startGame = async () => {
+		eliminateBrokePlayers();
+
+		const active = [playerStatus, ai1Status, ai2Status].filter((s) => s !== 'out');
+		if (active.length < 2) {
+			gameOver = true;
+			tournamentOver = true;
+			return;
+		}
+
+		gameOver = false;
+		tournamentOver = false;
 		gameStatus = 'started';
 		currentPhase = 0;
-		ai1Status = 'playing';
-		ai2Status = 'playing';
-		playerStatus = 'playing';
+		if (playerStatus !== 'out') playerStatus = 'playing';
+		if (ai1Status !== 'out') ai1Status = 'playing';
+		if (ai2Status !== 'out') ai2Status = 'playing';
 		playerDecision = '';
 		winner = '';
 		revealAllHands = false;
 		playerContribution = 0;
 		ai1Contribution = 0;
 		ai2Contribution = 0;
+		raiseAmount = minRaise;
 
 		rotateDealer();
 		postBlinds();
@@ -115,25 +150,43 @@
 	const determineAIBets = () => {
 		const toCall = currentBet;
 		if (ai1Status === 'playing' && ai1Contribution < toCall) {
-			const action = Math.random();
-			if (action < 0.6)
-				placeBet('ai1', toCall - ai1Contribution); // call
-			else ai1Status = 'fold';
+			if (chips.ai1 >= toCall - ai1Contribution) {
+				const action = Math.random();
+				if (action < 0.6) placeBet('ai1', toCall - ai1Contribution);
+				else ai1Status = 'fold';
+			} else {
+				ai1Status = 'fold';
+			}
 		}
 		if (ai2Status === 'playing' && ai2Contribution < toCall) {
-			const action = Math.random();
-			if (action < 0.6)
-				placeBet('ai2', toCall - ai2Contribution); // call
-			else ai2Status = 'fold';
+			if (chips.ai2 >= toCall - ai2Contribution) {
+				const action = Math.random();
+				if (action < 0.6) placeBet('ai2', toCall - ai2Contribution);
+				else ai2Status = 'fold';
+			} else {
+				ai2Status = 'fold';
+			}
 		}
 	};
 
 	const checkIfGameOver = (board: any[]) => {
 		const alivePlayers = [
-			{ name: 'Toi', cards: playerStatus === 'playing' ? playerCards : [], status: playerStatus },
-			{ name: 'IA 1', cards: ai1Status === 'playing' ? ai1Cards : [], status: ai1Status },
-			{ name: 'IA 2', cards: ai2Status === 'playing' ? ai2Cards : [], status: ai2Status }
-		].filter((p) => p.status !== 'fold');
+			{
+				name: 'Toi',
+				cards: playerStatus === 'playing' || playerStatus === 'all-in' ? playerCards : [],
+				status: playerStatus
+			},
+			{
+				name: 'IA 1',
+				cards: ai1Status === 'playing' || ai1Status === 'all-in' ? ai1Cards : [],
+				status: ai1Status
+			},
+			{
+				name: 'IA 2',
+				cards: ai2Status === 'playing' || ai2Status === 'all-in' ? ai2Cards : [],
+				status: ai2Status
+			}
+		].filter((p) => p.status !== 'fold' && p.status !== 'out');
 
 		if (alivePlayers.length === 1) {
 			winner = `${alivePlayers[0].name} gagne car tout le monde s'est couché !`;
@@ -144,6 +197,8 @@
 			currentPhase = 3;
 			chips[alivePlayers[0].name.toLowerCase().replace(' ', '')] += pot;
 			pot = 0;
+			eliminateBrokePlayers();
+			checkIfOnlyOneRemaining();
 			return true;
 		}
 		return false;
@@ -155,7 +210,6 @@
 		currentPhase += 1;
 
 		const board = [...flop, ...(turn ? [turn] : []), ...(river ? [river] : [])];
-
 		determineAIBets();
 
 		if (checkIfGameOver(board)) return;
@@ -174,9 +228,9 @@
 			playerHandDesc = evaluateHand([...playerCards, ...board]);
 			revealAllHands = true;
 
-			const finalPlayer = playerStatus === 'playing' ? playerCards : [];
-			const finalAi1 = ai1Status !== 'fold' ? ai1Cards : [];
-			const finalAi2 = ai2Status !== 'fold' ? ai2Cards : [];
+			const finalPlayer = playerStatus !== 'fold' && playerStatus !== 'out' ? playerCards : [];
+			const finalAi1 = ai1Status !== 'fold' && ai1Status !== 'out' ? ai1Cards : [];
+			const finalAi2 = ai2Status !== 'fold' && ai2Status !== 'out' ? ai2Cards : [];
 
 			const result = determineWinner(finalPlayer, finalAi1, finalAi2, board);
 			isDraw = result.toLowerCase().includes('égalité');
@@ -186,20 +240,23 @@
 			if (isDraw) {
 				chips.player += Math.floor(pot / 2);
 				chips.ai1 += Math.floor(pot / 2);
-			} else if (isPlayerWinner) {
+			} else if (result.toLowerCase().includes('toi')) {
 				chips.player += pot;
-			} else if (result.includes('IA 1')) {
+			} else if (result.toLowerCase().includes('ia 1')) {
 				chips.ai1 += pot;
-			} else if (result.includes('IA 2')) {
+			} else if (result.toLowerCase().includes('ia 2')) {
 				chips.ai2 += pot;
 			}
-			pot = 0;
+
+			pot = 0; 
+			eliminateBrokePlayers(); 
+			checkIfOnlyOneRemaining();
 			gameStatus = '';
 		}
 	};
 
 	const autoAdvanceIfFold = () => {
-		if (playerStatus === 'fold' && currentPhase < 3) {
+		if ((playerStatus === 'fold' || playerStatus === 'all-in') && currentPhase < 3) {
 			setTimeout(() => {
 				nextPhase();
 			}, 1500);
@@ -212,22 +269,27 @@
 		startGame();
 	};
 
-	const canPlayerCall = () => chips.player >= currentBet - playerContribution;
-	const canPlayerRaise = () => chips.player >= currentBet - playerContribution + minRaise;
+	const canPlayerCall = () =>
+		chips.player >= currentBet - playerContribution && playerStatus === 'playing';
+	const canPlayerRaise = () =>
+		chips.player >= currentBet - playerContribution + minRaise && playerStatus === 'playing';
+
 	const playerCall = () => {
 		if (!canPlayerCall()) return;
 		placeBet('player', currentBet - playerContribution);
 		hasActedThisPhase = true;
 		nextPhase();
 	};
+
 	const playerRaise = () => {
 		if (!canPlayerRaise()) return;
-		const raiseAmount = minRaise;
-		placeBet('player', currentBet - playerContribution + raiseAmount);
-		currentBet += raiseAmount;
+		const amount = Math.max(raiseAmount, minRaise);
+		placeBet('player', currentBet - playerContribution + amount);
+		currentBet += amount;
 		hasActedThisPhase = true;
 		nextPhase();
 	};
+
 	const playerFold = () => {
 		playerStatus = 'fold';
 		hasActedThisPhase = true;
@@ -347,8 +409,63 @@
 			{/if}
 		</div>
 
-		<div class="flex flex-col gap-4">
+		<div class="flex flex-col items-center gap-4">
 			{#if currentPhase < 3 && playerStatus === 'playing'}
+				<div class="flex items-center justify-center gap-4">
+					<input
+						type="range"
+						min={minRaise}
+						max={chips.player}
+						step={25}
+						bind:value={raiseAmount}
+						class="h-10 w-48 appearance-none rounded-md bg-gray-800"
+						style="
+					background: linear-gradient(to right, #3b82f6 0%, #3b82f6 {((raiseAmount - minRaise) /
+							(chips.player - minRaise)) *
+							100}%, #1f2937 {((raiseAmount - minRaise) / (chips.player - minRaise)) *
+							100}%, #1f2937 100%);
+				  "
+					/>
+					<input
+						type="number"
+						min={minRaise}
+						max={chips.player}
+						step={25}
+						bind:value={raiseAmount}
+						class="w-20 rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-center text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+					/>
+				</div>
+
+				<style>
+					input[type='range']::-webkit-slider-thumb {
+						appearance: none;
+						width: 16px;
+						height: 40px; /* Full height of the slider */
+						background: #1a4c9c;
+						border-radius: 0.375rem;
+						cursor: pointer;
+						border: none;
+					}
+
+					input[type='range']::-moz-range-thumb {
+						width: 16px;
+						height: 40px;
+						background: #3b82f6;
+						border: none;
+						border-radius: 0.375rem;
+						cursor: pointer;
+					}
+
+					input[type='range']::-ms-thumb {
+						width: 16px;
+						height: 40px;
+						background: #3b82f6;
+						border: none;
+						border-radius: 0.375rem;
+						cursor: pointer;
+					}
+				</style>
+
 				<div class="mt-6 flex justify-center gap-4">
 					{#if chips.player >= currentBet - playerContribution}
 						<Button
@@ -376,6 +493,14 @@
 					>
 						Fold
 					</Button>
+				</div>
+				<div class="mt-2 flex justify-center gap-2">
+					<Button on:click={() => (raiseAmount = Math.min(chips.player, currentBet * 2))}>x2</Button
+					>
+					<Button on:click={() => (raiseAmount = Math.min(chips.player, currentBet * 3))}>x3</Button
+					>
+					<Button on:click={() => (raiseAmount = Math.min(chips.player, pot))}>Pot</Button>
+					<Button on:click={() => (raiseAmount = chips.player)}>All-in</Button>
 				</div>
 			{/if}
 
@@ -409,6 +534,26 @@
 			>
 				Nouvelle partie
 			</Button>
+
+			{#if tournamentOver || playerStatus === 'out'}
+				<div class="mt-4 rounded-xl bg-red-700 p-4 text-center shadow-lg">
+					<h2 class="text-xl font-bold text-white">🎉 Tournoi terminé 🎉</h2>
+					<p class="text-white">Il ne reste plus assez de joueurs pour continuer.</p>
+					<Button
+						class="mt-2 bg-blue-600 text-white hover:bg-blue-700"
+						on:click={() => {
+							chips = { player: 500, ai1: 500, ai2: 500 };
+							playerStatus = 'playing';
+							ai1Status = 'playing';
+							ai2Status = 'playing';
+							tournamentOver = false;
+							displayGame();
+						}}
+					>
+						Réinitialiser le tournoi
+					</Button>
+				</div>
+			{/if}
 		</div>
 	</div>
 </HomeLayout>
