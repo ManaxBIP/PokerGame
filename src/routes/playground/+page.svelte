@@ -1,15 +1,14 @@
 <script lang="ts">
 	import '../../app.css';
-    import { Button } from "$lib/components/ui/button/index.js";
-	import HomeLayout from '@/layouts/home.svelte'
+	import { Button } from '$lib/components/ui/button/index.js';
+	import HomeLayout from '@/layouts/home.svelte';
 	import { onMount } from 'svelte';
-
 	import { page } from '$app/stores';
 	import { trpc } from '@/trpc/client';
 	import { getRandomDecision, determineWinner, evaluateHand } from '$lib/utils/poker';
 
 	let ai1Status = 'playing';
-	let ai2Status = 'playing';	
+	let ai2Status = 'playing';
 	let playerStatus = 'playing';
 	let playerDecision = '';
 	let gameStatus = '';
@@ -17,22 +16,71 @@
 	let deckId = '';
 	let revealAllHands = false;
 	let hasActedThisPhase = false;
+	let isPlayerWinner = false;
+	let isDraw = false;
+	let currentPhase = 0;
+	let currentBet = 0;
+	let minRaise = 50;
+
 	let playerHandDesc: any = null;
 	let ai1HandDesc: any = null;
 	let ai2HandDesc: any = null;
-	let playerCards = [];
-	let ai1Cards = [];
-	let ai2Cards = [];
-	let isPlayerWinner = false;
-	let isDraw = false;
+	let playerCards: any[] = [];
+	let ai1Cards: any[] = [];
+	let ai2Cards: any[] = [];
 
+	let flop: any[] = [];
+	let turn: any = null;
+	let river: any = null;
 
+	let pot = 0;
+	let smallBlind = 25;
+	let bigBlind = 50;
+	let dealerPosition = 0;
 
-	let flop = [];
-	let turn = null;
-	let river = null;
+	let chips: any = {
+		player: 500,
+		ai1: 500,
+		ai2: 500
+	};
 
-	let currentPhase = 0;
+	let playerContribution = 0;
+	let ai1Contribution = 0;
+	let ai2Contribution = 0;
+
+	const rotateDealer = () => {
+		dealerPosition = (dealerPosition + 1) % 3;
+	};
+
+	const postBlinds = () => {
+		const order = ['player', 'ai1', 'ai2'];
+		const sb = order[(dealerPosition + 1) % 3];
+		const bb = order[(dealerPosition + 2) % 3];
+
+		chips[sb] -= smallBlind;
+		chips[bb] -= bigBlind;
+
+		pot = smallBlind + bigBlind;
+		currentBet = bigBlind;
+
+		if (sb === 'player') playerContribution = smallBlind;
+		if (sb === 'ai1') ai1Contribution = smallBlind;
+		if (sb === 'ai2') ai2Contribution = smallBlind;
+
+		if (bb === 'player') playerContribution = bigBlind;
+		if (bb === 'ai1') ai1Contribution = bigBlind;
+		if (bb === 'ai2') ai2Contribution = bigBlind;
+	};
+
+	const placeBet = (player: string, amount: number) => {
+		const bet = Math.min(chips[player], amount);
+		chips[player] -= bet;
+		pot += bet;
+		if (player === 'player') playerContribution += bet;
+		if (player === 'ai1') ai1Contribution += bet;
+		if (player === 'ai2') ai2Contribution += bet;
+		return bet;
+	};
 
 	const startGame = async () => {
 		gameStatus = 'started';
@@ -43,6 +91,13 @@
 		playerDecision = '';
 		winner = '';
 		revealAllHands = false;
+		playerContribution = 0;
+		ai1Contribution = 0;
+		ai2Contribution = 0;
+
+		rotateDealer();
+		postBlinds();
+
 		const deck = await trpc($page).shuffleDeck.query();
 		deckId = deck.deck_id;
 
@@ -57,23 +112,42 @@
 		river = community.river;
 	};
 
+	const determineAIBets = () => {
+		const toCall = currentBet;
+		if (ai1Status === 'playing' && ai1Contribution < toCall) {
+			const action = Math.random();
+			if (action < 0.6)
+				placeBet('ai1', toCall - ai1Contribution); // call
+			else ai1Status = 'fold';
+		}
+		if (ai2Status === 'playing' && ai2Contribution < toCall) {
+			const action = Math.random();
+			if (action < 0.6)
+				placeBet('ai2', toCall - ai2Contribution); // call
+			else ai2Status = 'fold';
+		}
+	};
+
 	const checkIfGameOver = (board: any[]) => {
 		const alivePlayers = [
 			{ name: 'Toi', cards: playerStatus === 'playing' ? playerCards : [], status: playerStatus },
 			{ name: 'IA 1', cards: ai1Status === 'playing' ? ai1Cards : [], status: ai1Status },
-			{ name: 'IA 2', cards: ai2Status === 'playing' ? ai2Cards : [], status: ai2Status },
-		].filter(p => p.status !== 'fold');
+			{ name: 'IA 2', cards: ai2Status === 'playing' ? ai2Cards : [], status: ai2Status }
+		].filter((p) => p.status !== 'fold');
 
 		if (alivePlayers.length === 1) {
 			winner = `${alivePlayers[0].name} gagne car tout le monde s'est couché !`;
+			isPlayerWinner = alivePlayers[0].name === 'Toi';
+			isDraw = false;
 			gameStatus = '';
 			revealAllHands = true;
 			currentPhase = 3;
+			chips[alivePlayers[0].name.toLowerCase().replace(' ', '')] += pot;
+			pot = 0;
 			return true;
 		}
 		return false;
 	};
-
 
 	const nextPhase = () => {
 		hasActedThisPhase = false;
@@ -82,55 +156,44 @@
 
 		const board = [...flop, ...(turn ? [turn] : []), ...(river ? [river] : [])];
 
-		if (playerStatus === 'fold') {
-			// au moins une IA doit rester
-			const ai1Decision = getRandomDecision();
-			const ai2Decision = ai1Decision === 'fold' ? 'check' : getRandomDecision();
-			if (ai1Status !== 'fold') ai1Status = ai1Decision;
-			if (ai2Status !== 'fold') ai2Status = ai2Decision;
-		} else {
-			if (ai1Status !== 'fold') ai1Status = getRandomDecision();
-			if (ai2Status !== 'fold') ai2Status = getRandomDecision();
-		}
+		determineAIBets();
 
 		if (checkIfGameOver(board)) return;
 
-
 		if (currentPhase === 1) {
-			playerHandDesc = playerStatus === 'playing' ? evaluateHand([...playerCards, ...flop]) : null;
+			playerHandDesc = evaluateHand([...playerCards, ...flop]);
 		} else if (currentPhase === 2) {
 			const board = [...flop, turn];
-			playerHandDesc = playerStatus === 'playing' ? evaluateHand([...playerCards, ...board]) : null;
+			playerHandDesc = evaluateHand([...playerCards, ...board]);
 		}
+
 		autoAdvanceIfFold();
+
 		if (currentPhase === 3) {
-
 			const board = [...flop, turn, river];
-			playerHandDesc = playerStatus === 'playing' ? evaluateHand([...playerCards, ...board]) : null;
-
-			if (playerStatus === 'fold') revealAllHands = true;
+			playerHandDesc = evaluateHand([...playerCards, ...board]);
+			revealAllHands = true;
 
 			const finalPlayer = playerStatus === 'playing' ? playerCards : [];
-			const finalAi1 = ai1Status != 'fold' ? ai1Cards : [];
-			const finalAi2 = ai2Status != 'fold' ? ai2Cards : [];
+			const finalAi1 = ai1Status !== 'fold' ? ai1Cards : [];
+			const finalAi2 = ai2Status !== 'fold' ? ai2Cards : [];
 
-			const alivePlayers = [
-			{ name: 'Toi', cards: finalPlayer, status: playerStatus },
-			{ name: 'IA 1', cards: finalAi1, status: ai1Status },
-			{ name: 'IA 2', cards: finalAi2, status: ai2Status }
-			].filter(p => p.status === 'playing' || p.status !== 'fold');
+			const result = determineWinner(finalPlayer, finalAi1, finalAi2, board);
+			isDraw = result.toLowerCase().includes('égalité');
+			isPlayerWinner = !isDraw && result.includes('Toi');
+			winner = result;
 
-			if (alivePlayers.length === 1) {
-				const soleWinner = alivePlayers[0];
-				isPlayerWinner = soleWinner.name === 'Toi';
-				winner = `${soleWinner.name} gagne car tout le monde s'est couché !`;
-			} else {
-				winner = determineWinner(finalPlayer, finalAi1, finalAi2, board);
-				isDraw = winner.toLowerCase().includes('égalité') || winner.toLowerCase().includes('ex-aequo');
-				isPlayerWinner = !isDraw && winner.includes('Toi');
-
+			if (isDraw) {
+				chips.player += Math.floor(pot / 2);
+				chips.ai1 += Math.floor(pot / 2);
+			} else if (isPlayerWinner) {
+				chips.player += pot;
+			} else if (result.includes('IA 1')) {
+				chips.ai1 += pot;
+			} else if (result.includes('IA 2')) {
+				chips.ai2 += pot;
 			}
-
+			pot = 0;
 			gameStatus = '';
 		}
 	};
@@ -144,131 +207,188 @@
 	};
 
 	const displayGame = () => {
-		const gameElement = document.getElementById('game');
-		const playButtonElement = document.getElementById('playButton');
-		if (playButtonElement) {
-			playButtonElement.classList.add('hidden');
-		}
-		if (gameElement) {
-			gameElement.classList.remove('hidden');
-		}
+		document.getElementById('playButton')?.classList.add('hidden');
+		document.getElementById('game')?.classList.remove('hidden');
+		startGame();
 	};
 
-	onMount(() => {
-		startGame();
-	});
+	const canPlayerCall = () => chips.player >= currentBet - playerContribution;
+	const canPlayerRaise = () => chips.player >= currentBet - playerContribution + minRaise;
+	const playerCall = () => {
+		if (!canPlayerCall()) return;
+		placeBet('player', currentBet - playerContribution);
+		hasActedThisPhase = true;
+		nextPhase();
+	};
+	const playerRaise = () => {
+		if (!canPlayerRaise()) return;
+		const raiseAmount = minRaise;
+		placeBet('player', currentBet - playerContribution + raiseAmount);
+		currentBet += raiseAmount;
+		hasActedThisPhase = true;
+		nextPhase();
+	};
+	const playerFold = () => {
+		playerStatus = 'fold';
+		hasActedThisPhase = true;
+		nextPhase();
+	};
 </script>
 
 <HomeLayout>
-
-	<div id="playButton" class="flex flex-col justify-between w-96 h-96 text-white border-1 border-black rounded-lg p-4 bg-[url(https://medias.lequipe.fr/img-ilosport-jpg/poker-aces-pair/1500000000406175/0-1200-604-75/7f4b1.jpg)] bg-cover bg-center">
+	<div
+		id="playButton"
+		class="border-1 flex h-96 w-96 flex-col justify-between rounded-lg border-black bg-[url(https://medias.lequipe.fr/img-ilosport-jpg/poker-aces-pair/1500000000406175/0-1200-604-75/7f4b1.jpg)] bg-cover bg-center p-4 text-white"
+	>
 		<h1 class="text-2xl font-bold">Poker</h1>
 		<button
-			class="bg-blue-500 text-white font-bold py-2 px-4 rounded"
-			on:click|preventDefault={displayGame}
-			>Jouer</button>
+			class="rounded bg-blue-500 px-4 py-2 font-bold text-white"
+			on:click|preventDefault={displayGame}>Jouer</button
+		>
 	</div>
-	
 
-	<div id="game" class="hidden min-h-[96vh] overflow-hidden bg-green-800 text-white flex flex-col items-center py-4 space-y-8 rounded-lg">
+	<div
+		id="game"
+		class="flex hidden min-h-[96vh] flex-col items-center justify-between space-y-8 overflow-hidden rounded-lg bg-green-800 py-4 text-white"
+	>
+		<!-- Pot & Jetons -->
+		<div class="flex w-full max-w-4xl justify-around text-lg font-semibold text-white">
+			<div class="flex items-center gap-2">
+				<svg class="h-6 w-6 fill-yellow-300" viewBox="0 0 100 100"
+					><circle cx="50" cy="50" r="48" stroke="white" stroke-width="4" fill="#facc15" /></svg
+				>
+				Pot : {pot}
+			</div>
+			<div class="flex items-center gap-2">
+				<svg class="h-6 w-6 fill-green-300" viewBox="0 0 100 100"
+					><circle cx="50" cy="50" r="48" stroke="white" stroke-width="4" fill="#4ade80" /></svg
+				>
+				Toi : {chips.player}
+			</div>
+			<div class="flex items-center gap-2">
+				<svg class="h-6 w-6 fill-blue-300" viewBox="0 0 100 100"
+					><circle cx="50" cy="50" r="48" stroke="white" stroke-width="4" fill="#60a5fa" /></svg
+				>
+				IA 1 : {chips.ai1}
+			</div>
+			<div class="flex items-center gap-2">
+				<svg class="h-6 w-6 fill-pink-400" viewBox="0 0 100 100"
+					><circle cx="50" cy="50" r="48" stroke="white" stroke-width="4" fill="#f472b6" /></svg
+				>
+				IA 2 : {chips.ai2}
+			</div>
+		</div>
+
 		<div class="flex gap-12">
+			<!-- IA 1 -->
 			<div class="text-center">
-			<p class="mb-1">IA 1 <span class="text-sm italic">({ai1Status})</span></p>
-			<div class="flex gap-2">
-				{#each ai1Cards as card}
-				<img
-					src={revealAllHands && ai1Status !== 'fold' ? card.image : "https://deckofcardsapi.com/static/img/back.png"}
-					class="w-16 rounded opacity-100"
-					style="opacity: {ai1Status === 'fold' ? 0.3 : 1}"
-					alt="AI Card"
-				/>
-				{/each}
+				<p class="mb-1">IA 1 <span class="text-sm italic">({ai1Status})</span></p>
+				<div class="flex gap-2">
+					{#each ai1Cards as card}
+						<img
+							src={revealAllHands && ai1Status !== 'fold'
+								? card.image
+								: 'https://deckofcardsapi.com/static/img/back.png'}
+							class="w-16 rounded opacity-100"
+							style="opacity: {ai1Status === 'fold' ? 0.3 : 1}"
+							alt="AI Card"
+						/>
+					{/each}
+				</div>
 			</div>
 
-			</div>
-		
+			<!-- IA 2 -->
 			<div class="text-center">
-			<p class="mb-1">IA 2 <span class="text-sm italic">({ai2Status})</span></p>
-			<div class="flex gap-2">
-				{#each ai2Cards as card}
-				<img
-					src={revealAllHands && ai2Status !== 'fold' ? card.image : "https://deckofcardsapi.com/static/img/back.png"}
-					class="w-16 rounded opacity-100"
-					style="opacity: {ai2Status === 'fold' ? 0.3 : 1}"
-					alt="AI Card"
-				/>
-				{/each}
+				<p class="mb-1">IA 2 <span class="text-sm italic">({ai2Status})</span></p>
+				<div class="flex gap-2">
+					{#each ai2Cards as card}
+						<img
+							src={revealAllHands && ai2Status !== 'fold'
+								? card.image
+								: 'https://deckofcardsapi.com/static/img/back.png'}
+							class="w-16 rounded opacity-100"
+							style="opacity: {ai2Status === 'fold' ? 0.3 : 1}"
+							alt="AI Card"
+						/>
+					{/each}
+				</div>
 			</div>
+		</div>
 
-			</div>
+		<div class="flex gap-2 border-b border-t py-4">
+			{#if currentPhase >= 1}
+				{#each flop as card}
+					<img src={card.image} class="w-20 rounded shadow" alt="Flop Card" />
+				{/each}
+			{/if}
+			{#if currentPhase >= 2}
+				<img src={turn.image} class="w-20 rounded shadow" alt="Turn Card" />
+			{/if}
+			{#if currentPhase >= 3}
+				<img src={river.image} class="w-20 rounded shadow" alt="River Card" />
+			{/if}
 		</div>
-  
-	  
-		<div class="flex gap-2 border-t border-b py-4">
-		  {#if currentPhase >= 1}
-			{#each flop as card}
-			  <img src={card.image} class="w-20 rounded shadow" alt="Flop Card"/>
-			{/each}
-		  {/if}
-		  {#if currentPhase >= 2}
-			<img src={turn.image} class="w-20 rounded shadow" alt="Turn Card"/>
-		  {/if}
-		  {#if currentPhase >= 3}
-			<img src={river.image} class="w-20 rounded shadow" alt="River Card"/>
-		  {/if}
-		</div>
-	  
+
 		<div class="text-center">
-		  <p class="mb-2">Toi</p>
-		  <div class="flex gap-2">
-			{#each playerCards as card}
-			  <img src={card.image} class="w-20 rounded shadow" alt="Player Card" style="opacity: {playerStatus === 'fold' ? 0.3 : 1}"/>
-			{/each}
-		  </div>
-		  {#if playerHandDesc}
-				<p class="text-sm mt-1 text-gray-400 italic">
+			<p class="mb-2">Toi</p>
+			<div class="flex gap-2">
+				{#each playerCards as card}
+					<img
+						src={card.image}
+						class="w-20 rounded shadow"
+						alt="Player Card"
+						style="opacity: {playerStatus === 'fold' ? 0.3 : 1}"
+					/>
+				{/each}
+			</div>
+			{#if playerHandDesc}
+				<p class="mt-1 text-sm italic text-gray-400">
 					Main : {playerHandDesc.hand.replace(/_/g, ' ')}
 				</p>
 			{/if}
-
 		</div>
-	  
-		<div class="flex gap-4 flex-col">
 
-		  {#if currentPhase < 3 && playerStatus === 'playing'}
-			<div class="mt-6 gap-4 justify-center flex">
-				<Button
-				class="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700"
-				on:click={() => {
-					playerDecision = 'check';
-					hasActedThisPhase = true;
-					nextPhase();
-				}}
-				>
-				Check
-				</Button>
-				<Button
-				class="bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700"
-				on:click={() => {
-					playerDecision = 'fold';
-					hasActedThisPhase = true;
-					playerStatus = 'fold';
-					nextPhase();
-				}}
-				>
-				Fold
-				</Button>
-			</div>
+		<div class="flex flex-col gap-4">
+			{#if currentPhase < 3 && playerStatus === 'playing'}
+				<div class="mt-6 flex justify-center gap-4">
+					{#if chips.player >= currentBet - playerContribution}
+						<Button
+							class="{currentBet - playerContribution === 0
+								? 'bg-green-500 hover:bg-green-600'
+								: 'bg-yellow-500 hover:bg-yellow-600'} rounded-xl px-4 py-2 text-black"
+							on:click={playerCall}
+						>
+							{currentBet - playerContribution === 0
+								? 'Check'
+								: `Call ${currentBet - playerContribution}`}
+						</Button>
+					{/if}
+					{#if chips.player >= currentBet - playerContribution + minRaise}
+						<Button
+							class="rounded-xl bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+							on:click={playerRaise}
+						>
+							Raise
+						</Button>
+					{/if}
+					<Button
+						class="rounded-xl bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+						on:click={playerFold}
+					>
+						Fold
+					</Button>
+				</div>
 			{/if}
 
 			{#if winner}
-				<div class="mt-6 px-6 py-4 rounded-2xl shadow-lg text-center max-w-md mx-auto border-4 animate-fade-in
-					{isDraw 
-						? 'bg-gray-500 text-white border-gray-300' 
-						: isPlayerWinner 
-							? 'bg-lime-400 text-gray-900 border-white' 
-							: 'bg-red-600 text-white border-red-800'}">
-					
+				<div
+					class="animate-fade-in mx-auto mt-6 max-w-md rounded-2xl border-4 px-6 py-4 text-center shadow-lg
+					{isDraw
+						? 'border-gray-300 bg-gray-500 text-white'
+						: isPlayerWinner
+							? 'border-white bg-lime-400 text-gray-900'
+							: 'border-red-800 bg-red-600 text-white'}"
+				>
 					<h2 class="text-2xl font-extrabold tracking-wide">
 						{#if isDraw}
 							🤝 Égalité 🤝
@@ -278,21 +398,18 @@
 							💀 Perdu 💀
 						{/if}
 					</h2>
-
 					<p class="mt-2 text-lg font-medium">{winner}</p>
 				</div>
 			{/if}
 
-
-
-		  <Button
+			<Button
 				on:click={startGame}
-				class="bg-gray-800 hover:bg-gray-900 px-4 py-2 rounded {gameStatus === 'started' ? 'hidden' : ''}"
+				class="rounded bg-gray-800 px-4 py-2 hover:bg-gray-900 {gameStatus === 'started'
+					? 'hidden'
+					: ''}"
 			>
 				Nouvelle partie
 			</Button>
-		  
 		</div>
-	  </div>	  
+	</div>
 </HomeLayout>
-
