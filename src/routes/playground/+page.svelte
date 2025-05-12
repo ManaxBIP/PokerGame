@@ -112,6 +112,17 @@
 		}
 	};
 
+	const displayGame = () => {
+		const gameElement = document.getElementById('game');
+		const playButtonElement = document.getElementById('playButton');
+		if (playButtonElement) {
+			playButtonElement.classList.add('hidden');
+		}
+		if (gameElement) {
+			gameElement.classList.remove('hidden');
+		}
+	};
+
 	onMount(() => {
 		startGame();
 	});
@@ -119,16 +130,16 @@
 
 <HomeLayout>
 
-	<div class="flex flex-col justify-between w-96 h-96 text-white border-1 border-black rounded-lg p-4 bg-[url(https://medias.lequipe.fr/img-ilosport-jpg/poker-aces-pair/1500000000406175/0-1200-604-75/7f4b1.jpg)] bg-cover bg-center">
+	<div id="playButton" class="flex flex-col justify-between w-96 h-96 text-white border-1 border-black rounded-lg p-4 bg-[url(https://medias.lequipe.fr/img-ilosport-jpg/poker-aces-pair/1500000000406175/0-1200-604-75/7f4b1.jpg)] bg-cover bg-center">
 		<h1 class="text-2xl font-bold">Poker</h1>
 		<button
 			class="bg-blue-500 text-white font-bold py-2 px-4 rounded"
-			on:click|preventDefault={loadData}
-			aria-busy={loading}
+			on:click|preventDefault={displayGame}
 			>Jouer</button>
 	</div>
 	
-	<div class="min-h-screen bg-green-700 text-white flex flex-col items-center py-8 space-y-8">
+
+	<div id="game" class="hidden min-h-[96vh] overflow-hidden bg-green-700 text-white flex flex-col items-center py-4 space-y-8 rounded-lg">
 		<div class="flex gap-12">
 			<div class="text-center">
 			<p class="mb-1">IA 1 <span class="text-sm italic">({ai1Status})</span></p>
